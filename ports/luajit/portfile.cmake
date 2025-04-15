@@ -6,8 +6,8 @@ endif()
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO LuaJIT/LuaJIT
-    REF d0e88930ddde28ff662503f9f20facf34f7265aa  #2023-01-04
-    SHA512 e4111b2d7eeb05676c62d69da13a380a51d98f082c0be575a414c09ee27ff17d101b5b4a95e1b8a1bad14d55a4d2b305718a11878fbf36e0d3d48e62ba03407f
+    REF eec7a8016c3381b949b5d84583800d05897fa960  #2025-04-13
+    SHA512 bb38094e6833b6995e984d0da561f83295e2738386cf790be15f88d91e0fc5a3169137f2dd179f292d7ffa6965e9a44fff7d8f39424c478688e80e914a879712
     HEAD_REF master
     PATCHES
         msvcbuild.patch
@@ -102,7 +102,24 @@ file(REMOVE_RECURSE
     "${CURRENT_PACKAGES_DIR}/share/man"
 )
 
-vcpkg_copy_tools(TOOL_NAMES luajit AUTO_CLEAN)
+# Ensure the bin directory exists
+file(MAKE_DIRECTORY "${CURRENT_PACKAGES_DIR}/bin")
+
+# Copy the luajit executable from the buildtrees location to the expected location
+if(EXISTS "${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-rel/src/luajit${VCPKG_TARGET_EXECUTABLE_SUFFIX}")
+    message(STATUS "Copying luajit from src directory to bin directory")
+    file(COPY
+        "${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-rel/src/luajit${VCPKG_TARGET_EXECUTABLE_SUFFIX}"
+        DESTINATION "${CURRENT_PACKAGES_DIR}/bin"
+        FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+    )
+endif()
+
+vcpkg_copy_tools(
+    TOOL_NAMES luajit
+    SEARCH_DIR "${CURRENT_PACKAGES_DIR}/bin"
+    AUTO_CLEAN
+)
 
 vcpkg_fixup_pkgconfig()
 
